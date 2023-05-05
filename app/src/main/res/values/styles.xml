@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="MainTitle">
+        <item name="android:color">?white_color</item>
+        <item name="fontFamily">@font/medulaone_regular</item>
+        <item name="android:textSize">33.91dp</item>
+    </style>
+
+</resources>
