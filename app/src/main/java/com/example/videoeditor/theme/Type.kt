@@ -36,10 +36,14 @@ internal fun InterFamilyStyle(weight: FontWeight, size: TextUnit = 16.sp) =
 
 data class VideoEditorTypography(
     val material: Typography = Typography(),
-    val medulaOneRegularTitle: TextStyle = MedulaOneMainTitleStyle(FontWeight.Normal, 33.91.sp),
+    val medulaOneRegularTitle: TextStyle = MedulaOneMainTitleStyle(FontWeight.Normal, 34.sp),
     val interFamilyBold: TextStyle = InterFamilyStyle(FontWeight.Bold, 30.sp),
+    val interFamilyMedium18 : TextStyle = InterFamilyStyle(FontWeight.Medium, 18.sp),
     val interFamilyMedium14 : TextStyle = InterFamilyStyle(FontWeight.Medium, 14.sp),
     val interFamilyMedium12 : TextStyle = InterFamilyStyle(FontWeight.Medium, 12.sp),
-    val interFamilyRegular: TextStyle = InterFamilyStyle(FontWeight.Normal, 14.sp),
-    val interFamilyLight: TextStyle = InterFamilyStyle(FontWeight.Light, 14.sp)
+    val interFamilyRegular14: TextStyle = InterFamilyStyle(FontWeight.Normal, 14.sp),
+    val interFamilyLight: TextStyle = InterFamilyStyle(FontWeight.Light, 14.sp),
+    val interFamilyBold16: TextStyle = InterFamilyStyle(FontWeight.Bold, 16.sp),
+    val interFamilyRegular12: TextStyle = InterFamilyStyle(FontWeight.Normal, 12.sp),
+    val interFamilyRegular10: TextStyle = InterFamilyStyle(FontWeight.Normal, 10.sp),
 )

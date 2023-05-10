@@ -45,7 +45,7 @@ fun MainScreen(
 
 ) {
     ConstraintLayout {
-        val (button, text) = createRefs()
+        val (button) = createRefs()
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
