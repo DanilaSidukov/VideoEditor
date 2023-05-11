@@ -14,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -104,7 +103,7 @@ fun MainScreen(
                 .width(268.dp)
                 .height(87.dp)
                 .clip(RoundedCornerShape(43.5.dp))
-                .background(color = VideoEditorTheme.colors.blackTransparentColor)
+                .background(color = VideoEditorTheme.colors.blackTransparent30Color)
                 .constrainAs(button) {
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)

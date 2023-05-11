@@ -65,6 +65,7 @@ dependencies {
     implementation "androidx.compose.material3:material3-window-size-class:$compose_material"
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
     implementation "androidx.compose.foundation:foundation:1.4.3"
+    implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
     // PagerState for compose
     implementation "com.google.accompanist:accompanist-pager:$accompanist_pager"
     implementation "com.google.accompanist:accompanist-pager-indicators:$accompanist_pager"

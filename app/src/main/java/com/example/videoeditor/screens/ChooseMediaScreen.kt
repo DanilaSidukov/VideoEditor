@@ -7,14 +7,11 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Top
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
@@ -27,7 +24,6 @@ import com.example.videoeditor.data.MediaPreviewEntity
 import com.example.videoeditor.theme.VideoEditorTheme
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import kotlinx.coroutines.launch
 
 class MediaItem(
     val mediaList: List<MediaPreviewEntity>?,
@@ -43,6 +39,10 @@ fun ChooseMediaScreen(
 
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
+    var tabPosition by remember { mutableStateOf(0) }
+
+    val selectedColorTab = VideoEditorTheme.colors.whiteColor
+    val unselectedColorTav = VideoEditorTheme.colors.greyTabTextColor
 
     val tabRowItem = listOf(
         MediaItem(
@@ -110,57 +110,8 @@ fun ChooseMediaScreen(
                     .padding(top = it.calculateTopPadding())
 
             ) {
-                ScrollableTabRow(
-                    selectedTabIndex = pagerState.currentPage,
-                    modifier = Modifier
-                        .background(color = VideoEditorTheme.colors.background)
-                        .width(208.dp)
-                        .height(35.dp)
-
-                        .clip(RoundedCornerShape(8.dp))
-                        .border(1.dp, color = VideoEditorTheme.colors.strokeGreyColor)
-                        .align(Alignment.CenterHorizontally),
-                    indicator = { tabPositions ->
-                        TabRowDefaults.Indicator(
-                            color = Color.Transparent
-                        )
-                    },
-                    divider = { Divider() },
-                    edgePadding = 0.dp
-                ) {
-                    tabRowItem.forEachIndexed { index, mediaItem ->
-                        val tabName = if (index == 0) "Storage"
-                        else "Cloud"
-                        val isSelected = pagerState.currentPage == index
-                        val backgroundTab =
-                            if (isSelected) VideoEditorTheme.colors.tabBackgroundColor
-                            else VideoEditorTheme.colors.background
-                        Tab(
-                            selected = pagerState.currentPage == index,
-                            modifier = Modifier
-                                .height(35.dp)
-                                .width(104.dp)
-                                .background(
-                                    backgroundTab,
-                                    shape = RoundedCornerShape(8.dp)
-                                ),
-                            onClick = {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            },
-                            text = {
-                                Text(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    text = tabName,
-                                    style = VideoEditorTheme.typography.interFamilyRegular12,
-                                    textAlign = TextAlign.Center,
-                                    color = if (isSelected) VideoEditorTheme.colors.whiteText
-                                    else VideoEditorTheme.colors.greyTabTextColor
-                                )
-                            }
-                        )
-                    }
+                TabView(tabPosition) { newPosition ->
+                    tabPosition = newPosition
                 }
 
                 HorizontalPager(
@@ -168,9 +119,10 @@ fun ChooseMediaScreen(
                     state = pagerState,
                     modifier = Modifier
                         .fillMaxHeight()
-                        .padding(top = 50.dp),
+                        .padding(top = 30.dp),
                     verticalAlignment = Top
                 ) {
+                    tabPosition = pagerState.currentPage
                     MediaPreviewItem(
                         list = tabRowItem[pagerState.currentPage].mediaList,
                         //onItemClicked = onItemClicked
@@ -236,6 +188,7 @@ fun MediaPreviewItem(
     }
 }
 
+@Preview
 @Composable
 fun ItemMediaPreview(
     item: MediaPreviewEntity = MediaPreviewEntity(
@@ -269,11 +222,15 @@ fun ItemMediaPreview(
             style = VideoEditorTheme.typography.interFamilyRegular10,
             color = VideoEditorTheme.colors.whiteText,
             modifier = Modifier
-                .align(
-                    Alignment.BottomStart
-                )
+                .align(Alignment.BottomStart)
                 .padding(start = 10.dp, bottom = 6.dp)
+                .background(
+                    color = VideoEditorTheme.colors.blackTransparent50Color,
+                    shape = RoundedCornerShape(15.dp)
+                )
+                .padding(vertical = 2.dp, horizontal = 5.dp)
         )
     }
 }
+
 

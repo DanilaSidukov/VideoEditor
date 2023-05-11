@@ -4,12 +4,12 @@ package com.example.videoeditor.theme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
-import java.util.PrimitiveIterator
 
 private val white = Color.White
 private val black = Color.Black
 private val grey = Color(0xFF6A6A6A)
-private val blackTransparent = Color(0x4D000000)
+private val blackTransparent30 = Color(0x4D000000)
+private val blackTransparent50 = Color(0x80000000)
 private val purple = Color(0xFF7A78FF)
 private val strokeGrey = Color(0xFF343437)
 private val tabBackground = Color(0xFF303033)
@@ -23,13 +23,14 @@ data class VideoEditorColors(
     private val white: Color,
     private val black: Color,
     private val grey: Color,
-    private val blackTransparent: Color,
+    private val blackTransparent30: Color,
     private val purple: Color,
     private val strokeGrey: Color,
     private val tabBackground: Color,
     private val greyTabText: Color,
+    private val blackTransparent50: Color
 
-){
+    ){
     val primary: Color get() = material.primary
     val background: Color get() = backgroundMaterial
     val secondary: Color get() = secondaryMaterial
@@ -37,7 +38,8 @@ data class VideoEditorColors(
     val whiteColor: Color get() = white
     val blackColor: Color get() = black
     val greyColor: Color get() = grey
-    val blackTransparentColor: Color get() = blackTransparent
+    val blackTransparent30Color: Color get() = blackTransparent30
+    val blackTransparent50Color: Color get() = blackTransparent50
     val purpleColor: Color get() = purple
     val strokeGreyColor: Color get() = strokeGrey
     val tabBackgroundColor: Color get() = tabBackground
@@ -53,9 +55,10 @@ val LightColors = VideoEditorColors(
     white = white,
     black = black,
     grey = grey,
-    blackTransparent = blackTransparent,
+    blackTransparent30 = blackTransparent30,
     purple = purple,
     strokeGrey = strokeGrey,
     tabBackground = tabBackground,
-    greyTabText = greyTabText
+    greyTabText = greyTabText,
+    blackTransparent50 = blackTransparent50
 )
