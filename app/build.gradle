@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
 }
 
 android {
@@ -46,6 +48,8 @@ dependencies {
     def compose_version = '1.4.2'
     def compose_material = '1.0.1'
     def accompanist_pager = '0.31.1-alpha'
+    def room_version = '2.5.1'
+    def nav_version = "2.5.3"
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -66,6 +70,8 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
     implementation "androidx.compose.foundation:foundation:1.4.3"
     implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
+    // Compose Navigation
+    implementation "androidx.navigation:navigation-compose:$nav_version"
     // PagerState for compose
     implementation "com.google.accompanist:accompanist-pager:$accompanist_pager"
     implementation "com.google.accompanist:accompanist-pager-indicators:$accompanist_pager"
@@ -81,5 +87,13 @@ dependencies {
     // Accompanist
     implementation 'com.google.accompanist:accompanist-insets:0.31.1-alpha'
     implementation 'com.google.accompanist:accompanist-insets-ui:0.31.1-alpha'
+
+    //Room
+    implementation("androidx.room:room-runtime:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.legacy:legacy-support-v4:1.0.0"
+    implementation"androidx.room:room-ktx:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
 
 }

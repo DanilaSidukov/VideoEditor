@@ -1,7 +1,9 @@
 package com.example.videoeditor.screens
 
+import android.Manifest
 import android.annotation.SuppressLint
-import androidx.compose.foundation.ExperimentalFoundationApi
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -22,29 +24,49 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.navigation.NavHostController
+import androidx.room.util.getColumnIndexOrThrow
 import coil.compose.rememberAsyncImagePainter
 import com.example.videoeditor.R
 import com.example.videoeditor.data.ProjectItem
 import com.example.videoeditor.data.Settings.Companion.mockProjects
+import com.example.videoeditor.data.logic.showMessage
+import com.example.videoeditor.di.viewModelWithFactory
+import com.example.videoeditor.screens.choosemedia.ChooseMediaScreen
 import com.example.videoeditor.theme.VideoEditorTheme
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
-@Preview
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-
+    navController: NavHostController
 ) {
-    ConstraintLayout {
-        val (button) = createRefs()
+
+    var isIconClicked by remember { mutableStateOf(false) }
+    var isPermissionGranted by remember { mutableStateOf(false) }
+
+    GetMediaPermissions(
+        onPermissionGranted = { isPermissionGranted = true },
+        onPermissionDenied = {
+            isPermissionGranted = false
+            OnPermissionDenied()
+        }
+    )
+
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
@@ -79,76 +101,93 @@ fun MainScreen(
                     },
                 )
             }, content = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = VideoEditorTheme.colors.background)
-                        .padding(top = it.calculateTopPadding())
-                ) {
-                    LazyColumn(
-                        contentPadding = PaddingValues(horizontal = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(32.dp)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = VideoEditorTheme.colors.background)
+                            .padding(top = it.calculateTopPadding())
                     ) {
-                        items(5) {
-                            ItemPreview(
-                                item = mockProjects
-                            )
+                        LazyColumn(
+                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(32.dp)
+                        ) {
+                            items(5) {
+                                ItemPreview(
+                                    item = mockProjects
+                                )
+                            }
+                        }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 48.dp)
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = 42.dp)
+                                .height(87.dp)
+                                .clip(RoundedCornerShape(43.5.dp))
+                                .background(color = VideoEditorTheme.colors.blackTransparent30Color),
+                            contentAlignment = Alignment.Center
+                        ){
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                modifier = Modifier
+                                    .fillMaxSize(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                IconButton(onClick = {  }) {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_camera),
+                                        contentDescription = null,
+                                        tint = VideoEditorTheme.colors.whiteColor
+                                    )
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .size(60.dp)
+                                        .clip(CircleShape)
+                                        .background(VideoEditorTheme.colors.purpleColor),
+                                    contentAlignment = Alignment.Center
+                                ){
+                                    IconButton(onClick = {
+                                        isIconClicked = true
+                                    }) {
+                                        Icon(
+                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_add),
+                                            contentDescription = null,
+                                            tint = VideoEditorTheme.colors.whiteColor
+                                        )
+                                    }
+                                }
+                                IconButton(onClick = {  }) {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_galery),
+                                        contentDescription = null,
+                                        tint = VideoEditorTheme.colors.whiteColor
+                                    )
+                                }
+                            }
                         }
                     }
                 }
-            }
         )
-        Box(
-            modifier = Modifier
-                .width(268.dp)
-                .height(87.dp)
-                .clip(RoundedCornerShape(43.5.dp))
-                .background(color = VideoEditorTheme.colors.blackTransparent30Color)
-                .constrainAs(button) {
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(parent.bottom, margin = 32.dp)
+
+    if (isIconClicked) {
+        isIconClicked = false
+        if (isPermissionGranted) {
+            ChooseMediaScreen(
+                chooseMediaViewModel = viewModelWithFactory(),
+                onItemClicked = {
+
                 }
-        ){
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier
-                    .fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = {  }) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_camera),
-                        contentDescription = null,
-                        tint = VideoEditorTheme.colors.whiteColor
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                        .background(VideoEditorTheme.colors.purpleColor),
-                    contentAlignment = Alignment.Center
-                ){
-                    IconButton(onClick = {  }) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_add),
-                            contentDescription = null,
-                            tint = VideoEditorTheme.colors.whiteColor
-                        )
-                    }
-                }
-                IconButton(onClick = {  }) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_galery),
-                        contentDescription = null,
-                        tint = VideoEditorTheme.colors.whiteColor
-                    )
-                }
+            )
+        } else {
+            GetMediaPermissions(onPermissionGranted = { isPermissionGranted = true }) {
+                isPermissionGranted = false
+                OnPermissionDenied()
+                LocalContext.current.showMessage("Can't open without permission")
             }
         }
     }
-
 }
 
 @Composable
@@ -319,3 +358,58 @@ fun ItemPreview(
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun GetMediaPermissions(
+    onPermissionGranted: @Composable () -> Unit,
+    onPermissionDenied: @Composable () -> Unit
+){
+    val permissionState = rememberMultiplePermissionsState(
+        permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) listOf(
+        Manifest.permission.READ_MEDIA_AUDIO,
+        Manifest.permission.READ_MEDIA_IMAGES
+    ) else listOf(
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+    )
+    )
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    
+    DisposableEffect(
+        key1 = lifecycleOwner,
+        effect = {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_START) {
+                    permissionState.launchMultiplePermissionRequest()
+                }
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+
+            onDispose{
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
+        }
+    )
+
+    when {
+        permissionState.allPermissionsGranted -> onPermissionGranted()
+        permissionState.shouldShowRationale -> onPermissionDenied()
+    }
+
+}
+@Composable
+fun OnPermissionDenied(){
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(VideoEditorTheme.colors.background),
+    ) {
+        Text(
+            text = "Permission denied, please, go te settings and enable permission",
+            color = VideoEditorTheme.colors.whiteText,
+            textAlign = TextAlign.Center,
+            style = VideoEditorTheme.typography.interFamilyRegular14
+        )
+    }
+}

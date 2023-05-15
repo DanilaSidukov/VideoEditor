@@ -1,4 +1,4 @@
-package com.example.videoeditor.screens
+package com.example.videoeditor.screens.choosemedia
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -63,6 +63,7 @@ fun TabTitle(
         else VideoEditorTheme.colors.greyTabTextColor
     )
 }
+
 
 @Composable
 fun TabView(

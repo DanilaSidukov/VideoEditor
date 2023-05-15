@@ -1,6 +1,8 @@
-package com.example.videoeditor.screens
+package com.example.videoeditor.screens.choosemedia
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -12,62 +14,53 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Top
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
 import com.example.videoeditor.R
-import com.example.videoeditor.data.MediaPreviewEntity
+import com.example.videoeditor.data.service.MediaFiles
 import com.example.videoeditor.theme.VideoEditorTheme
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.launch
 
 class MediaItem(
-    val mediaList: List<MediaPreviewEntity>?,
+    val mediaItemsList: List<MediaFiles>?,
 )
 
-@Preview
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@RequiresApi(Build.VERSION_CODES.R)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChooseMediaScreen(
-    //onItemClicked: (MediaPreviewEntity) -> Unit
+    chooseMediaViewModel: ChooseMediaViewModel,
+    onItemClicked: (MediaFiles) -> Unit
 ) {
 
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
     var tabPosition by remember { mutableStateOf(0) }
+    var isPageScrolled by remember { mutableStateOf(false) }
+    var pagePosition by remember { mutableStateOf(0) }
 
-    val selectedColorTab = VideoEditorTheme.colors.whiteColor
-    val unselectedColorTav = VideoEditorTheme.colors.greyTabTextColor
+    var isDataLoaded by remember { mutableStateOf(false) }
+
+    var mediaList by remember { mutableStateOf<List<MediaFiles>>(emptyList()) }
+
+    LaunchedEffect(
+        key1 = true,
+        block = {
+            mediaList = chooseMediaViewModel.getMediaList()
+            isDataLoaded = true
+        }
+    )
 
     val tabRowItem = listOf(
         MediaItem(
-            listOf(
-                MediaPreviewEntity(
-                    R.drawable.mock_image,
-                    //ConverterImage("mock_image.png"),
-                    "12:11"
-                ),
-                MediaPreviewEntity(
-                    R.drawable.mock_image,
-                    //ConverterImage("mock_image.png"),
-                    "7:12"
-                ),
-                MediaPreviewEntity(
-                    R.drawable.mock_image,
-                    //ConverterImage("mock_image.png"),
-                    "1:54"
-                ),
-                MediaPreviewEntity(
-                    R.drawable.mock_image,
-                    //ConverterImage("mock_image.png"),
-                    "52:01"
-                )
-            ),
+            mediaList
         ),
         MediaItem(
             null
@@ -110,24 +103,45 @@ fun ChooseMediaScreen(
                     .padding(top = it.calculateTopPadding())
 
             ) {
-                TabView(tabPosition) { newPosition ->
-                    tabPosition = newPosition
-                }
+                if (isDataLoaded) {
+                    TabView(pagePosition) { newPosition ->
+                        isPageScrolled = true
+                        tabPosition = newPosition
+                    }
 
-                HorizontalPager(
-                    count = tabRowItem.size,
-                    state = pagerState,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .padding(top = 30.dp),
-                    verticalAlignment = Top
+                    HorizontalPager(
+                        count = tabRowItem.size,
+                        state = pagerState,
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .padding(top = 30.dp),
+                        verticalAlignment = Top
+                    ) {
+                        pagePosition = pagerState.currentPage
+                        if (isPageScrolled){
+                            coroutineScope.launch {
+                                pagerState.scrollToPage(tabPosition)
+                                isPageScrolled = false
+                            }
+                        }
+                        MediaPreviewItem(
+                            list = tabRowItem[pagerState.currentPage].mediaItemsList,
+                            onItemClicked = onItemClicked,
+                            pagePosition
+                        )
+                    }
+                }
+                else Box(
+                    Modifier.fillMaxSize()
                 ) {
-                    tabPosition = pagerState.currentPage
-                    MediaPreviewItem(
-                        list = tabRowItem[pagerState.currentPage].mediaList,
-                        //onItemClicked = onItemClicked
+                    Text(
+                        text = "Loading...",
+                        textAlign = TextAlign.Center,
+                        color = VideoEditorTheme.colors.whiteText,
+                        modifier = Modifier.align(Alignment.Center)
                     )
                 }
+
             }
         }
     )
@@ -136,14 +150,15 @@ fun ChooseMediaScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MediaPreviewItem(
-    list: List<MediaPreviewEntity>?,
-    //onItemClicked: (MediaPreviewEntity) -> Unit
+    list: List<MediaFiles>?,
+    onItemClicked: (MediaFiles) -> Unit,
+    tabPosition: Int,
 ) {
     CompositionLocalProvider(
         LocalOverscrollConfiguration.provides(null)
     ) {
-        if (!list.isNullOrEmpty()) {
-            Box {
+        if (tabPosition == 0) {
+            Box{
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
                     modifier = Modifier.fillMaxSize(),
@@ -151,17 +166,20 @@ fun MediaPreviewItem(
                     horizontalArrangement = Arrangement.spacedBy(7.dp),
                     verticalArrangement = Arrangement.spacedBy(7.dp)
                 ) {
-                    items(list.size) { index ->
-                        ItemMediaPreview(
-                            item = list[index],
-                        )
+                    if (list != null) {
+                        items(list.size) { index ->
+                            ItemMediaPreview(
+                                item = list[index],
+                                onItemClicked = onItemClicked
+                            )
+                        }
                     }
                 }
                 Button(
                     modifier = Modifier
+                        .background(color = VideoEditorTheme.colors.background)
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(30.5.dp))
-                        //.background(color = VideoEditorTheme.colors.purpleColor)
                         .padding(horizontal = 48.dp)
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 42.dp),
@@ -188,15 +206,11 @@ fun MediaPreviewItem(
     }
 }
 
-@Preview
+
 @Composable
 fun ItemMediaPreview(
-    item: MediaPreviewEntity = MediaPreviewEntity(
-        R.drawable.mock_image,
-        //ConverterImage("mock_image.png"),
-        "12:11"
-    ),
-    //onItemClicked: () -> Unit
+    item: MediaFiles,
+    onItemClicked: (MediaFiles) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -206,30 +220,26 @@ fun ItemMediaPreview(
 
     ) {
         Image(
-            painter = rememberAsyncImagePainter(
-                model = R.drawable.mock_image,
-                //                Image(
-//                    bitmap = item.itemImage.asImageBitmap(),
-//                    contentDescription = null
-//                )
-            ),
+            bitmap = item.mediaBitmap?.asImageBitmap()!!,
             null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
         )
-        Text(
-            text = item.itemDuration!!,
-            style = VideoEditorTheme.typography.interFamilyRegular10,
-            color = VideoEditorTheme.colors.whiteText,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(start = 10.dp, bottom = 6.dp)
-                .background(
-                    color = VideoEditorTheme.colors.blackTransparent50Color,
-                    shape = RoundedCornerShape(15.dp)
-                )
-                .padding(vertical = 2.dp, horizontal = 5.dp)
-        )
+        if (item.mediaDuration != null){
+            Text(
+                text = item.mediaDuration.toString(),
+                style = VideoEditorTheme.typography.interFamilyRegular10,
+                color = VideoEditorTheme.colors.whiteText,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 10.dp, bottom = 6.dp)
+                    .background(
+                        color = VideoEditorTheme.colors.blackTransparent50Color,
+                        shape = RoundedCornerShape(15.dp)
+                    )
+                    .padding(vertical = 2.dp, horizontal = 5.dp)
+            )
+        }
     }
 }
 

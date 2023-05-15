@@ -1,6 +1,8 @@
 package com.example.videoeditor.data.logic
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.*
@@ -10,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.unit.Dp
-import com.example.videoeditor.screens.TabPosition
+import com.example.videoeditor.screens.choosemedia.TabPosition
 
 @SuppressLint("UnnecessaryComposedModifier")
 fun Modifier.tabIndicator(
@@ -36,4 +38,8 @@ fun Modifier.tabIndicator(
         .offset(x = indicatorOffset)
         .width(currentTabWidth)
         .fillMaxHeight()
+}
+
+fun Context.showMessage(message: String){
+    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 }
