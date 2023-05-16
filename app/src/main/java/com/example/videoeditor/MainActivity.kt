@@ -30,19 +30,11 @@ class MainActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         )
 
-        val vm = ChooseMediaViewModel(
-            MediaDataProvider(
-                this
-            )
-        )
-
         setContent {
 
             val navController = rememberNavController()
 
-            //MainScreen(navController = navController)
-            ChooseMediaScreen(chooseMediaViewModel = vm,
-                onItemClicked = {})
+            MainScreen(navController = navController)
         }
 
     }

@@ -212,6 +212,7 @@ fun ItemMediaPreview(
     item: MediaFiles,
     onItemClicked: (MediaFiles) -> Unit
 ) {
+    println("duration = ${item.mediaDuration}")
     Box(
         modifier = Modifier
             .height(114.dp)
