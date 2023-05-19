@@ -96,4 +96,7 @@ dependencies {
     implementation"androidx.room:room-ktx:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
 
+    //FFmpegKit Android
+    implementation 'com.arthenica:ffmpeg-kit-full:5.1'
+
 }

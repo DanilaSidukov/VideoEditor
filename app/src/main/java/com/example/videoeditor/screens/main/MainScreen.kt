@@ -34,7 +34,10 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.room.util.getColumnIndexOrThrow
 import coil.compose.rememberAsyncImagePainter
 import com.example.videoeditor.R
@@ -53,19 +56,10 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    navController: NavHostController
+    navController: NavController
 ) {
 
     var isIconClicked by remember { mutableStateOf(false) }
-    var isPermissionGranted by remember { mutableStateOf(false) }
-
-    GetMediaPermissions(
-        onPermissionGranted = { isPermissionGranted = true },
-        onPermissionDenied = {
-            isPermissionGranted = false
-            OnPermissionDenied()
-        }
-    )
 
         Scaffold(
             topBar = {
@@ -150,6 +144,7 @@ fun MainScreen(
                                 ){
                                     IconButton(onClick = {
                                         isIconClicked = true
+                                        navController.navigate("ChooseMediaScreen")
                                     }) {
                                         Icon(
                                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_add),
@@ -171,23 +166,8 @@ fun MainScreen(
                 }
         )
 
-    if (isIconClicked) {
-        isIconClicked = false
-        if (isPermissionGranted) {
-            ChooseMediaScreen(
-                chooseMediaViewModel = viewModelWithFactory(),
-                onItemClicked = {
+    if (isIconClicked) isIconClicked = false
 
-                }
-            )
-        } else {
-            GetMediaPermissions(onPermissionGranted = { isPermissionGranted = true }) {
-                isPermissionGranted = false
-                OnPermissionDenied()
-                LocalContext.current.showMessage("Can't open without permission")
-            }
-        }
-    }
 }
 
 @Composable
@@ -358,58 +338,4 @@ fun ItemPreview(
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun GetMediaPermissions(
-    onPermissionGranted: @Composable () -> Unit,
-    onPermissionDenied: @Composable () -> Unit
-){
-    val permissionState = rememberMultiplePermissionsState(
-        permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) listOf(
-        Manifest.permission.READ_MEDIA_AUDIO,
-        Manifest.permission.READ_MEDIA_IMAGES
-    ) else listOf(
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE
-    )
-    )
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-    
-    DisposableEffect(
-        key1 = lifecycleOwner,
-        effect = {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_START) {
-                    permissionState.launchMultiplePermissionRequest()
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-
-            onDispose{
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
-        }
-    )
-
-    when {
-        permissionState.allPermissionsGranted -> onPermissionGranted()
-        permissionState.shouldShowRationale -> onPermissionDenied()
-    }
-
-}
-@Composable
-fun OnPermissionDenied(){
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(VideoEditorTheme.colors.background),
-    ) {
-        Text(
-            text = "Permission denied, please, go te settings and enable permission",
-            color = VideoEditorTheme.colors.whiteText,
-            textAlign = TextAlign.Center,
-            style = VideoEditorTheme.typography.interFamilyRegular14
-        )
-    }
-}

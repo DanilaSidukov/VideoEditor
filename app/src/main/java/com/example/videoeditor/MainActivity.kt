@@ -10,10 +10,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.rememberNavController
-import com.example.videoeditor.data.service.MediaDataProvider
-import com.example.videoeditor.screens.MainScreen
-import com.example.videoeditor.screens.choosemedia.ChooseMediaScreen
-import com.example.videoeditor.screens.choosemedia.ChooseMediaViewModel
+import com.example.videoeditor.screens.AppStartScreen
 
 
 class MainActivity : AppCompatActivity() {
@@ -34,7 +31,7 @@ class MainActivity : AppCompatActivity() {
 
             val navController = rememberNavController()
 
-            MainScreen(navController = navController)
+            AppStartScreen(navController = navController)
         }
 
     }

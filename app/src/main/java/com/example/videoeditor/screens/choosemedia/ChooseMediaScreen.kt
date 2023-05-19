@@ -7,6 +7,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.example.videoeditor.R
 import com.example.videoeditor.data.service.MediaFiles
 import com.example.videoeditor.theme.VideoEditorTheme
@@ -37,6 +39,7 @@ class MediaItem(
 @Composable
 fun ChooseMediaScreen(
     chooseMediaViewModel: ChooseMediaViewModel,
+    navController: NavHostController,
     onItemClicked: (MediaFiles) -> Unit
 ) {
 
@@ -47,6 +50,8 @@ fun ChooseMediaScreen(
     var pagePosition by remember { mutableStateOf(0) }
 
     var isDataLoaded by remember { mutableStateOf(false) }
+
+
 
     var mediaList by remember { mutableStateOf<List<MediaFiles>>(emptyList()) }
 
@@ -90,7 +95,7 @@ fun ChooseMediaScreen(
                         modifier = Modifier
                             .padding(start = 31.dp)
                             .clickable {
-
+                                navController.popBackStack()
                             }
                     )
                 }
@@ -147,6 +152,7 @@ fun ChooseMediaScreen(
     )
 }
 
+@SuppressLint("UnrememberedMutableState", "MutableCollectionMutableState")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MediaPreviewItem(
@@ -154,6 +160,9 @@ fun MediaPreviewItem(
     onItemClicked: (MediaFiles) -> Unit,
     tabPosition: Int,
 ) {
+
+    val choosenItemList: MutableList<MediaFiles> by mutableStateOf(mutableListOf())
+
     CompositionLocalProvider(
         LocalOverscrollConfiguration.provides(null)
     ) {
@@ -170,7 +179,9 @@ fun MediaPreviewItem(
                         items(list.size) { index ->
                             ItemMediaPreview(
                                 item = list[index],
-                                onItemClicked = onItemClicked
+                                onItemClicked = {
+                                },
+                                choosenItemList
                             )
                         }
                     }
@@ -207,17 +218,24 @@ fun MediaPreviewItem(
 }
 
 
+@SuppressLint("UnrememberedMutableState", "MutableCollectionMutableState")
 @Composable
 fun ItemMediaPreview(
     item: MediaFiles,
-    onItemClicked: (MediaFiles) -> Unit
+    onItemClicked: (MediaFiles) -> Unit,
+    choosenItemList: MutableList<MediaFiles>
 ) {
-    println("duration = ${item.mediaDuration}")
+
+    var tempBool by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .height(114.dp)
             .width(114.dp)
             .clip(RoundedCornerShape(8.dp))
+            .clickable {
+                tempBool = !tempBool
+            },
 
     ) {
         Image(
@@ -226,6 +244,27 @@ fun ItemMediaPreview(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
         )
+
+        if (tempBool){
+            Box(
+                modifier = Modifier
+                    .padding(end = 7.dp, top = 6.dp)
+                    .size(22.dp)
+                    .clip(CircleShape)
+                    .background(VideoEditorTheme.colors.purpleColor)
+                    .align(Alignment.TopEnd)
+            ) {
+                Icon(
+                    ImageVector.vectorResource(id = R.drawable.ic_choose),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.Center),
+                    tint = VideoEditorTheme.colors.whiteColor
+                )
+            }
+            choosenItemList.add(item)
+        } else choosenItemList.remove(item)
+
         if (item.mediaDuration != null){
             Text(
                 text = item.mediaDuration.toString(),
