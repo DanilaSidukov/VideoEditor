@@ -1,6 +1,5 @@
-package com.example.videoeditor.screens
+package com.example.videoeditor.screens.main
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -24,31 +23,19 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.room.util.getColumnIndexOrThrow
 import coil.compose.rememberAsyncImagePainter
 import com.example.videoeditor.R
 import com.example.videoeditor.data.ProjectItem
 import com.example.videoeditor.data.Settings.Companion.mockProjects
-import com.example.videoeditor.data.logic.showMessage
-import com.example.videoeditor.di.viewModelWithFactory
-import com.example.videoeditor.screens.choosemedia.ChooseMediaScreen
 import com.example.videoeditor.theme.VideoEditorTheme
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.example.videoeditor.utility.Screen
 
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -144,7 +131,7 @@ fun MainScreen(
                                 ){
                                     IconButton(onClick = {
                                         isIconClicked = true
-                                        navController.navigate("ChooseMediaScreen")
+                                        navController.navigate(Screen.ChooseMedia.route)
                                     }) {
                                         Icon(
                                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_add),

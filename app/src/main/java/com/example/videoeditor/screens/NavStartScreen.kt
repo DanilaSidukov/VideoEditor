@@ -20,7 +20,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.videoeditor.di.viewModelWithFactory
 import com.example.videoeditor.screens.choosemedia.ChooseMediaScreen
+import com.example.videoeditor.screens.main.MainScreen
 import com.example.videoeditor.theme.VideoEditorTheme
+import com.example.videoeditor.utility.Screen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
@@ -43,18 +45,20 @@ fun AppStartScreen(
 fun NavigationGraph(
     navController: NavHostController,
 ) {
-    NavHost(navController = navController, startDestination = "ChooseMediaScreen") {
-        composable("getStoragePermission") {
+    NavHost(navController = navController, startDestination = Screen.ChooseMedia.route) {
+        composable(Screen.GetStoragePermission.route) {
             GetMediaPermissions(
                 onPermissionGranted = { MainScreen(navController) },
                 onPermissionDenied = { OnPermissionDenied() }
             )
         }
-        composable("ChooseMediaScreen") { ChooseMediaScreen(
+        composable(Screen.ChooseMedia.route) {
+            ChooseMediaScreen(
             chooseMediaViewModel = viewModelWithFactory(),
             navController,
             onItemClicked = {}
-        ) }
+            )
+        }
     }
 }
 
