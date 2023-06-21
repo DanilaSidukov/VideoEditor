@@ -288,8 +288,9 @@ fun ItemPreview(
                                     }
                             ) {
                                 Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_dialog_share),
-                                    null
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_share),
+                                    null,
+                                    tint = VideoEditorTheme.colors.iconGreyColor
                                 )
                                 Text(
                                     text = "Share",

@@ -14,6 +14,7 @@ private val purple = Color(0xFF7A78FF)
 private val strokeGrey = Color(0xFF343437)
 private val tabBackground = Color(0xFF303033)
 private val greyTabText = Color(0xFF666666)
+private val iconGrey = Color(0xFF6A6A6A)
 
 data class VideoEditorColors(
     val material: ColorScheme,
@@ -28,7 +29,8 @@ data class VideoEditorColors(
     private val strokeGrey: Color,
     private val tabBackground: Color,
     private val greyTabText: Color,
-    private val blackTransparent50: Color
+    private val blackTransparent50: Color,
+    private val iconGrey: Color,
 
     ){
     val primary: Color get() = material.primary
@@ -44,6 +46,7 @@ data class VideoEditorColors(
     val strokeGreyColor: Color get() = strokeGrey
     val tabBackgroundColor: Color get() = tabBackground
     val greyTabTextColor: Color get() = greyTabText
+    val iconGreyColor: Color get() = iconGrey
 
 }
 
@@ -60,5 +63,6 @@ val LightColors = VideoEditorColors(
     strokeGrey = strokeGrey,
     tabBackground = tabBackground,
     greyTabText = greyTabText,
-    blackTransparent50 = blackTransparent50
+    blackTransparent50 = blackTransparent50,
+    iconGrey = iconGrey
 )
