@@ -3,6 +3,7 @@ package com.example.videoeditor.data
 import android.os.Build
 import android.widget.ImageView
 import androidx.annotation.RequiresApi
+import androidx.compose.ui.unit.dp
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -14,6 +15,10 @@ class Settings {
             name = "LIGHTHOUSE",
             date = "11 DEC 2022"
         )
+
+        val MAX_STRETCHING = 30.dp
+        val MIN_STRETCHING = 8.dp
+        val MEASURE_STEP = 0.5.dp
     }
 
 }
