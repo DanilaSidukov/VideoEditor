@@ -51,6 +51,8 @@ dependencies {
     def room_version = '2.5.1'
     def nav_version = "2.5.3"
 
+    implementation project(':videomanager')
+
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.8.0'
@@ -95,8 +97,5 @@ dependencies {
     implementation "androidx.legacy:legacy-support-v4:1.0.0"
     implementation"androidx.room:room-ktx:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
-
-    //FFmpegKit Android
-    implementation 'com.arthenica:ffmpeg-kit-full:5.1'
 
 }
