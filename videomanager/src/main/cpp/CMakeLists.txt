@@ -7,7 +7,7 @@
 cmake_minimum_required(VERSION 3.22.1)
 
 # Declares and names the project.
-project("video_manager")
+project("videomanager")
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
@@ -51,9 +51,13 @@ add_library( # Sets the name of the library.
         # Provides a relative path to your source file(s).
         # temporary measure, these two should be header files
         video_manager.cpp
+        ffmpegDecoder/FFmpegDecode.cpp
 )
 
+# Specifying location of ffmpeg headers
 include_directories(ffmpeg/${ANDROID_ABI}/include)
+# Specify folders included into this module
+include_directories(ffmpegDecoder)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
@@ -69,11 +73,15 @@ target_link_directories(
 
         PRIVATE log
 
+        avformat
         avcodec
+        avio
         avdevice
         avfilter
-        avformat
         avutil
+        imgutils
+        packet
+        log
         wresample
         wscale
 )

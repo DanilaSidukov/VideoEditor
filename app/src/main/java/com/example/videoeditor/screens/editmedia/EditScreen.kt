@@ -24,6 +24,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.example.videoeditor.R
 import com.example.videoeditor.theme.VideoEditorTheme
 import com.example.videomanager.VideoManager
@@ -80,12 +81,19 @@ fun EditScreen(
                 .fillMaxWidth()
                 .fillMaxHeight(0.6f)
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.mock_image),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Fit
+                AndroidView(
+                    factory = { context ->
+                        android.widget.VideoView(context).apply {
+                            
+                        }
+                    }
                 )
+//                Image(
+//                    painter = painterResource(id = R.drawable.mock_image),
+//                    contentDescription = null,
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentScale = ContentScale.Fit
+//                )
             }
 
             Row(
