@@ -7,55 +7,57 @@
 cmake_minimum_required(VERSION 3.22.1)
 
 # Declares and names the project.
-project("videomanager")
+project("video_engine")
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
 
+# Specifying location of ffmpeg shared objects
+set(ffmpeg_DIR ffmpeg)
 # libavcodec
 add_library(avcodec SHARED IMPORTED)
-set_target_properties(avcodec PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/ffmpeg/${ANDROID_ABI}/libavcodec.so)
+set_target_properties(avcodec PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/${ffmpeg_DIR}/${ANDROID_ABI}/libavcodec.so)
 
 # libavdevice
 add_library(avdevice SHARED IMPORTED)
-set_target_properties(avcodec PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/ffmpeg/${ANDROID_ABI}/libavdevice.so)
+set_target_properties(avdevice PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/${ffmpeg_DIR}/${ANDROID_ABI}/libavdevice.so)
 
 # libavfilter
 add_library(avfilter SHARED IMPORTED)
-set_target_properties(avcodec PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/ffmpeg/${ANDROID_ABI}/libavfilter.so)
+set_target_properties(avfilter PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/${ffmpeg_DIR}/${ANDROID_ABI}/libavfilter.so)
 
 # libavformat
 add_library(avformat SHARED IMPORTED)
-set_target_properties(avcodec PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/ffmpeg/${ANDROID_ABI}/libavformat.so)
+set_target_properties(avformat PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/${ffmpeg_DIR}/${ANDROID_ABI}/libavformat.so)
 
 # libavutil
 add_library(avutil SHARED IMPORTED)
-set_target_properties(avcodec PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/ffmpeg/${ANDROID_ABI}/libavutil.so)
+set_target_properties(avutil PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/${ffmpeg_DIR}/${ANDROID_ABI}/libavutil.so)
 
 # libswresample
 add_library(wresample SHARED IMPORTED)
-set_target_properties(avcodec PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/ffmpeg/${ANDROID_ABI}/libswresample.so)
+set_target_properties(wresample PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/${ffmpeg_DIR}/${ANDROID_ABI}/libswresample.so)
 
 # libswscale
 add_library(wscale SHARED IMPORTED)
-set_target_properties(avcodec PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/ffmpeg/${ANDROID_ABI}/libswscale.so)
+set_target_properties(wscale PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/${ffmpeg_DIR}/${ANDROID_ABI}/libswscale.so)
 
 add_library( # Sets the name of the library.
-        video_manager
+        video_engine
 
         # Sets the library as a shared library.
         SHARED
 
         # Provides a relative path to your source file(s).
         # temporary measure, these two should be header files
-        video_manager.cpp
-        ffmpegDecoder/FFmpegDecode.cpp
-)
+        video_engine.cpp
+        ffmpegDecoder/FFmpegDecoder.cpp
+        )
 
 # Specifying location of ffmpeg headers
-include_directories(ffmpeg/${ANDROID_ABI}/include)
+include_directories(${ffmpeg_DIR}/${ANDROID_ABI}/include)
 # Specify folders included into this module
 include_directories(ffmpegDecoder)
 
@@ -68,20 +70,16 @@ include_directories(ffmpegDecoder)
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this
 # build script, prebuilt third-party libraries, or system libraries.
-target_link_directories(
-        video_manager
+target_link_libraries(
+        video_engine
 
         PRIVATE log
 
-        avformat
         avcodec
-        avio
         avdevice
         avfilter
+        avformat
         avutil
-        imgutils
-        packet
-        log
         wresample
         wscale
 )
