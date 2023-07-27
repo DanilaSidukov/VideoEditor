@@ -4,7 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.videoeditor.VideoEditorApplication
-import com.example.videoeditor.screens.choosemedia.ChooseMediaViewModel
+import com.example.videoeditor.ui.screens.choosemedia.ChooseMediaViewModel
+import com.example.videoeditor.utility.EditViewModel
 
 inline fun <reified VM: ViewModel> constructViewModel(): ViewModelProvider.NewInstanceFactory =
     object :ViewModelProvider.NewInstanceFactory() {
@@ -12,6 +13,9 @@ inline fun <reified VM: ViewModel> constructViewModel(): ViewModelProvider.NewIn
             return when(VM::class) {
                 ChooseMediaViewModel::class -> ChooseMediaViewModel(
                         VideoEditorApplication.getInjector().mediaDataProvider
+                )
+                EditViewModel::class -> EditViewModel(
+                    VideoEditorApplication.getInjector().videoManager
                 )
                 else -> throw ClassNotFoundException()
             } as T

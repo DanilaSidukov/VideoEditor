@@ -7,7 +7,6 @@ extern "C" {
 #include <libavutil/log.h>
 #include <libswresample/swresample.h>
 #include <libswscale/swscale.h>
-#include <libavcodec/packet.h>
 #include <libavutil/imgutils.h>
 #include "../utils/Logger.h"
 }

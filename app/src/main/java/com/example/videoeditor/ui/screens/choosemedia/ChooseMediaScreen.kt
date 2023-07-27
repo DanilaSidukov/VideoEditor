@@ -1,4 +1,4 @@
-package com.example.videoeditor.screens.choosemedia
+package com.example.videoeditor.ui.screens.choosemedia
 
 import android.annotation.SuppressLint
 import android.os.Build
@@ -15,32 +15,43 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Top
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.videoeditor.R
+import com.example.videoeditor.data.logic.convertFirstFrameToBitmap
+import com.example.videoeditor.data.logic.convertImageToBitmap
+import com.example.videoeditor.data.logic.showMessage
 import com.example.videoeditor.data.service.MediaFiles
 import com.example.videoeditor.theme.VideoEditorTheme
+import com.example.videoeditor.ui.widgets.CircleProgressBar
+import com.example.videoeditor.ui.widgets.TabView
+import com.example.videoeditor.utility.Screen
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MediaItem(
-    val mediaItemsList: List<MediaFiles>?,
+    val mediaItemsList: List<MediaFiles>,
 )
 
 @RequiresApi(Build.VERSION_CODES.R)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "CoroutineCreationDuringComposition")
+@SuppressLint(
+    "UnusedMaterial3ScaffoldPaddingParameter", "CoroutineCreationDuringComposition",
+    "MutableCollectionMutableState"
+)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChooseMediaScreen(
     chooseMediaViewModel: ChooseMediaViewModel,
     navController: NavHostController,
-    onItemClicked: (MediaFiles) -> Unit
+    onItemClicked: (MediaFiles) -> Unit,
 ) {
 
     val pagerState = rememberPagerState()
@@ -51,24 +62,21 @@ fun ChooseMediaScreen(
 
     var isDataLoaded by remember { mutableStateOf(false) }
 
+    val mediaList = remember { mutableListOf<MediaFiles>() }
 
-
-    var mediaList by remember { mutableStateOf<List<MediaFiles>>(emptyList()) }
-
-    LaunchedEffect(
-        key1 = true,
-        block = {
-            mediaList = chooseMediaViewModel.getMediaList()
+    LaunchedEffect(true) {
+        chooseMediaViewModel.mediaFlow.collect {
+            mediaList.add(it)
             isDataLoaded = true
         }
-    )
+    }
 
     val tabRowItem = listOf(
         MediaItem(
-            mediaList
+            mediaList.toList()
         ),
         MediaItem(
-            null
+            emptyList()
         )
     )
 
@@ -123,7 +131,7 @@ fun ChooseMediaScreen(
                         verticalAlignment = Top
                     ) {
                         pagePosition = pagerState.currentPage
-                        if (isPageScrolled){
+                        if (isPageScrolled) {
                             coroutineScope.launch {
                                 pagerState.scrollToPage(tabPosition)
                                 isPageScrolled = false
@@ -132,19 +140,15 @@ fun ChooseMediaScreen(
                         MediaPreviewItem(
                             list = tabRowItem[pagerState.currentPage].mediaItemsList,
                             onItemClicked = onItemClicked,
-                            pagePosition
+                            pagePosition,
+                            navController
                         )
                     }
-                }
-                else Box(
-                    Modifier.fillMaxSize()
+                } else Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Loading...",
-                        textAlign = TextAlign.Center,
-                        color = VideoEditorTheme.colors.whiteText,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    CircleProgressBar()
                 }
 
             }
@@ -156,18 +160,20 @@ fun ChooseMediaScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MediaPreviewItem(
-    list: List<MediaFiles>?,
+    list: List<MediaFiles>,
     onItemClicked: (MediaFiles) -> Unit,
     tabPosition: Int,
+    navController: NavHostController,
 ) {
 
-    val choosenItemList: MutableList<MediaFiles> by mutableStateOf(mutableListOf())
+    val chosenItemList: MutableList<MediaFiles> by mutableStateOf(mutableListOf())
+    var isMediaChosen by remember { mutableStateOf(true) }
 
     CompositionLocalProvider(
         LocalOverscrollConfiguration.provides(null)
     ) {
         if (tabPosition == 0) {
-            Box{
+            Box {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
                     modifier = Modifier.fillMaxSize(),
@@ -175,15 +181,13 @@ fun MediaPreviewItem(
                     horizontalArrangement = Arrangement.spacedBy(7.dp),
                     verticalArrangement = Arrangement.spacedBy(7.dp)
                 ) {
-                    if (list != null) {
-                        items(list.size) { index ->
-                            ItemMediaPreview(
-                                item = list[index],
-                                onItemClicked = {
-                                },
-                                choosenItemList
-                            )
-                        }
+                    items(list.size) { index ->
+                        ItemMediaPreview(
+                            item = list[index],
+                            onItemClicked = {
+                            },
+                            chosenItemList
+                        )
                     }
                 }
                 Button(
@@ -194,7 +198,18 @@ fun MediaPreviewItem(
                         .padding(horizontal = 48.dp)
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 42.dp),
-                    onClick = { }
+                    onClick = {
+                        isMediaChosen = if (chosenItemList.isNotEmpty()) {
+                            navController.currentBackStackEntry?.savedStateHandle?.set(
+                                key = "media",
+                                value = chosenItemList
+                            )
+                            navController.navigate(Screen.Edit.route)
+                            true
+                        } else {
+                            false
+                        }
+                    }
                 ) {
                     Text(
                         textAlign = TextAlign.Center,
@@ -204,6 +219,10 @@ fun MediaPreviewItem(
                         modifier = Modifier.padding(vertical = 5.dp)
                     )
                 }
+            }
+            if (!isMediaChosen) {
+                LocalContext.current.showMessage("No media selected, please choose something")
+                isMediaChosen = true
             }
         } else {
             Text(
@@ -223,10 +242,22 @@ fun MediaPreviewItem(
 fun ItemMediaPreview(
     item: MediaFiles,
     onItemClicked: (MediaFiles) -> Unit,
-    choosenItemList: MutableList<MediaFiles>
+    chosenItemList: MutableList<MediaFiles>,
 ) {
 
+    println("drawing again")
+
+    val context = LocalContext.current
+
     var tempBool by remember { mutableStateOf(false) }
+    var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+
+    LaunchedEffect(item.mediaId) {
+        launch(Dispatchers.Default) {
+            imageBitmap = if (item.isVideo) convertFirstFrameToBitmap(context, item.mediaId)
+            else convertImageToBitmap(context, item.mediaPath!!)
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -236,16 +267,16 @@ fun ItemMediaPreview(
             .clickable {
                 tempBool = !tempBool
             },
-
     ) {
-        Image(
-            bitmap = item.mediaBitmap?.asImageBitmap()!!,
-            null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-        )
-
-        if (tempBool){
+        imageBitmap?.let {
+            Image(
+                bitmap = it,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
+        }
+        if (tempBool) {
             Box(
                 modifier = Modifier
                     .padding(end = 7.dp, top = 6.dp)
@@ -257,15 +288,14 @@ fun ItemMediaPreview(
                 Icon(
                     ImageVector.vectorResource(id = R.drawable.ic_choose),
                     contentDescription = null,
-                    modifier = Modifier
-                        .align(Alignment.Center),
+                    modifier = Modifier.align(Alignment.Center),
                     tint = VideoEditorTheme.colors.whiteColor
                 )
             }
-            choosenItemList.add(item)
-        } else choosenItemList.remove(item)
+            chosenItemList.add(item)
+        } else chosenItemList.remove(item)
 
-        if (item.mediaDuration != null){
+        if (item.mediaDuration != null) {
             Text(
                 text = item.mediaDuration.toString(),
                 style = VideoEditorTheme.typography.interFamilyRegular10,
@@ -281,6 +311,7 @@ fun ItemMediaPreview(
             )
         }
     }
+
 }
 
 

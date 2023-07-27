@@ -1,4 +1,4 @@
-package com.example.videoeditor.screens
+package com.example.videoeditor.ui.screens
 
 import android.Manifest
 import android.os.Build
@@ -18,13 +18,17 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.videoeditor.data.service.MediaFiles
 import com.example.videoeditor.di.viewModelWithFactory
-import com.example.videoeditor.screens.choosemedia.ChooseMediaScreen
-import com.example.videoeditor.screens.main.MainScreen
+import com.example.videoeditor.ui.screens.choosemedia.ChooseMediaScreen
+import com.example.videoeditor.ui.screens.editmedia.EditScreen
+import com.example.videoeditor.ui.screens.main.MainScreen
 import com.example.videoeditor.theme.VideoEditorTheme
+import com.example.videoeditor.ui.screens.choosemedia.ChooseMediaViewModel
 import com.example.videoeditor.utility.Screen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import kotlinx.coroutines.flow.collect
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
@@ -45,7 +49,8 @@ fun AppStartScreen(
 fun NavigationGraph(
     navController: NavHostController,
 ) {
-    NavHost(navController = navController, startDestination = Screen.ChooseMedia.route) {
+
+    NavHost(navController = navController, startDestination = Screen.GetStoragePermission.route) {
         composable(Screen.GetStoragePermission.route) {
             GetMediaPermissions(
                 onPermissionGranted = { MainScreen(navController) },
@@ -57,6 +62,13 @@ fun NavigationGraph(
             chooseMediaViewModel = viewModelWithFactory(),
             navController,
             onItemClicked = {}
+            )
+        }
+        composable(Screen.Edit.route){
+            EditScreen(
+                navController = navController,
+                mediaList = navController.previousBackStackEntry!!.savedStateHandle.get<List<MediaFiles>>("media")!!,
+                editViewModel = viewModelWithFactory()
             )
         }
     }

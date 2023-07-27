@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.unit.Dp
-import com.example.videoeditor.screens.choosemedia.TabPosition
+import com.example.videoeditor.ui.widgets.TabPosition
 import kotlin.math.sqrt
 
 @SuppressLint("UnnecessaryComposedModifier")

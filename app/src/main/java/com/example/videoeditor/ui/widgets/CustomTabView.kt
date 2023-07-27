@@ -1,4 +1,4 @@
-package com.example.videoeditor.screens.choosemedia
+package com.example.videoeditor.ui.widgets
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.FastOutSlowInEasing

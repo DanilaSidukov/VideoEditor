@@ -1,4 +1,4 @@
-package com.example.videoeditor.screens.editmedia
+package com.example.videoeditor.ui.screens.editmedia
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -25,17 +26,30 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.example.videoeditor.R
+import com.example.videoeditor.data.service.MediaFiles
 import com.example.videoeditor.theme.VideoEditorTheme
+import com.example.videoeditor.utility.EditViewModel
 import com.example.videomanager.VideoManager
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun EditScreen(
-    //navController: NavHostController
+    navController: NavHostController,
+    mediaList: List<MediaFiles>,
+    editViewModel: EditViewModel,
 ){
+
+    LaunchedEffect(
+        key1 = true,
+        block = {
+          editViewModel.loadVideoFile(mediaList[0].mediaPath.toString())
+        })
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),

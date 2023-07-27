@@ -1,4 +1,4 @@
-package com.example.videoeditor.screens.editmedia
+package com.example.videoeditor.ui.screens.editmedia
 
 import android.view.MotionEvent
 import androidx.compose.foundation.Canvas

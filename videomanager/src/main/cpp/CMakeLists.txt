@@ -54,12 +54,15 @@ add_library( # Sets the name of the library.
         # temporary measure, these two should be header files
         video_engine.cpp
         ffmpegDecoder/FFmpegDecoder.cpp
+        player/VideoPlayer.cpp
+        utils/Extensions.cpp
         )
 
 # Specifying location of ffmpeg headers
 include_directories(${ffmpeg_DIR}/${ANDROID_ABI}/include)
 # Specify folders included into this module
 include_directories(ffmpegDecoder)
+include_directories(player)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by

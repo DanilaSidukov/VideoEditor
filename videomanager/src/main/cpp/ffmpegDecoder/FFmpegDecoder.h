@@ -10,99 +10,107 @@
 
 class FFmpegDecoder
 {
+    const char* path;
+    FILE* inFile;
     // constructor.
-public: FFmpegDecoder() : pImgConvertCtx(NULL), audioBaseTime(0.0), videoBaseTime(0.0),
+public: FFmpegDecoder(const char* filePath) : pImgConvertCtx(NULL), audioBaseTime(0.0), videoBaseTime(0.0),
                           videoFramePerSecond(0.0), isOpen(false), audioStreamIndex(-1), videoStreamIndex(-1),
-                          pAudioCodec(NULL), pAudioCodecCtx(NULL), pVideoCodec(NULL), pVideoCodecCtx(NULL),
+                          pAudioCodec(NULL), pAudioCodecCtx(NULL), pVideoCodec(NULL), pVideoCodecCtx(NULL), path(filePath),
                           pFormatCtx(NULL) {;}
 
     // destructor.
-public: virtual ~FFmpegDecoder()
+    virtual ~FFmpegDecoder()
     {
         CloseFile();
     }
 
     // Open file
-public: virtual bool OpenFile(std::string& inputFile);
+    virtual bool OpenFile(std::string& inputFile);
 
     // Close file and free resourses.
-public: virtual bool CloseFile();
+    virtual bool CloseFile();
 
     // Return next frame FFmpeg.
-public: virtual AVFrame * GetNextFrame();
+    virtual AVFrame * GetNextFrame();
 
-public: int GetWidth()
+    // open video stream.
+    bool OpenVideo();
+
+    // open audio stream.
+    bool OpenAudio();
+
+    // close video stream.
+    void CloseVideo();
+
+    // close audio stream.
+    void CloseAudio();
+
+    // Decode audio from packet.
+    int DecodeAudio(int nStreamIndex, const AVPacket *avpkt,
+                    uint8_t* pOutBuffer, size_t nOutBufferSize);
+
+    // Decode video buffer.
+    bool DecodeVideo(const AVPacket *avpkt, AVFrame * pOutFrame);
+
+    int GetWidth()
     {
         return width;
     }
-public: int GetHeight()
+    int GetHeight()
     {
         return height;
     }
 
-    // open video stream.
-private: bool OpenVideo();
+    float GetBase(){
+        return audioBaseTime;
+    }
 
-    // open audio stream.
-private: bool OpenAudio();
-
-    // close video stream.
-private: void CloseVideo();
-
-    // close audio stream.
-private: void CloseAudio();
+private:
 
     // return rgb image
-private: AVFrame * GetRGBAFrame(AVFrame *pFrameYuv);
-
-    // Decode audio from packet.
-private: int DecodeAudio(int nStreamIndex, const AVPacket *avpkt,
-                         uint8_t* pOutBuffer, size_t nOutBufferSize);
-
-    // Decode video buffer.
-private: bool DecodeVideo(const AVPacket *avpkt, AVFrame * pOutFrame);
+    AVFrame * GetRGBAFrame(AVFrame *pFrameYuv);
 
     // FFmpeg file format.
-private: AVFormatContext* pFormatCtx;
+    AVFormatContext* pFormatCtx;
 
     // FFmpeg codec context.
-private: AVCodecContext* pVideoCodecCtx;
+    AVCodecContext* pVideoCodecCtx;
 
     // FFmpeg codec for video.
-private: AVCodec* pVideoCodec;
+    AVCodec* pVideoCodec;
 
     // FFmpeg codec context for audio.
-private: AVCodecContext* pAudioCodecCtx;
+    AVCodecContext* pAudioCodecCtx;
 
     // FFmpeg codec for audio.
-private: AVCodec* pAudioCodec;
+    AVCodec* pAudioCodec;
 
     // Video stream number in file.
-private: int videoStreamIndex;
+    int videoStreamIndex;
 
     // Audio stream number in file.
-private: int audioStreamIndex;
+    int audioStreamIndex;
 
     // File is open or not.
-private: bool isOpen;
+    bool isOpen;
 
     // Video frame per seconds.
-private: double videoFramePerSecond;
+    double videoFramePerSecond;
 
     // FFmpeg timebase for video.
-private: double videoBaseTime;
+    double videoBaseTime;
 
     // FFmpeg timebase for audio.
-private: double audioBaseTime;
+    double audioBaseTime;
 
     // FFmpeg context convert image.
-private: struct SwsContext *pImgConvertCtx;
+    struct SwsContext *pImgConvertCtx;
 
     // Width of image
-private: int width;
+    int width;
 
     // Height of image
-private: int height;
+    int height;
 };
 
 #endif

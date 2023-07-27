@@ -10,7 +10,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.rememberNavController
-import com.example.videoeditor.screens.AppStartScreen
+import com.example.videoeditor.ui.screens.AppStartScreen
 
 
 class MainActivity : AppCompatActivity() {

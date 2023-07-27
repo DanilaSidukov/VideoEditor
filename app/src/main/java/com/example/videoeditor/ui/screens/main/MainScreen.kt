@@ -1,4 +1,4 @@
-package com.example.videoeditor.screens.main
+package com.example.videoeditor.ui.screens.main
 
 import android.annotation.SuppressLint
 import android.os.Build
@@ -6,10 +6,13 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -43,115 +47,135 @@ import com.example.videoeditor.utility.Screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    navController: NavController
+    navController: NavController,
 ) {
 
     var isIconClicked by remember { mutableStateOf(false) }
 
-        Scaffold(
-            topBar = {
-                CenterAlignedTopAppBar(
-                    modifier = Modifier.statusBarsPadding(),
-                    title = {
-                        Text(
-                            text = "WESHOT",
-                            style = VideoEditorTheme.typography.medulaOneRegularTitle,
-                            textAlign = TextAlign.Center
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                modifier = Modifier.statusBarsPadding(),
+                title = {
+                    Text(
+                        text = "WESHOT",
+                        style = VideoEditorTheme.typography.medulaOneRegularTitle,
+                        textAlign = TextAlign.Center
+                    )
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = VideoEditorTheme.colors.background,
+                    titleContentColor = VideoEditorTheme.colors.whiteText
+                ),
+                actions = {
+                    IconButton(onClick = { Unit }) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_lightning),
+                            null,
+                            tint = VideoEditorTheme.colors.whiteColor,
+                            modifier = Modifier.padding(start = 20.dp)
                         )
-                    },
-                    colors = TopAppBarDefaults.smallTopAppBarColors(
-                        containerColor = VideoEditorTheme.colors.background,
-                        titleContentColor = VideoEditorTheme.colors.whiteText
-                    ),
-                    actions = {
-                        IconButton(onClick = { Unit }) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_lightning),
-                                null,
-                                tint = VideoEditorTheme.colors.whiteColor,
-                                modifier = Modifier.padding(start = 20.dp)
-                            )
-                        }
-                        IconButton(onClick = { Unit }) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_settings),
-                                contentDescription = null,
-                                tint = VideoEditorTheme.colors.whiteColor
-                            )
-                        }
-                    },
-                )
-            }, content = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = VideoEditorTheme.colors.background)
-                            .padding(top = it.calculateTopPadding())
-                    ) {
-                        LazyColumn(
-                            contentPadding = PaddingValues(horizontal = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(32.dp)
-                        ) {
-                            items(5) {
-                                ItemPreview(
-                                    item = mockProjects
-                                )
-                            }
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 48.dp)
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = 42.dp)
-                                .height(87.dp)
-                                .clip(RoundedCornerShape(43.5.dp))
-                                .background(color = VideoEditorTheme.colors.blackTransparent30Color),
-                            contentAlignment = Alignment.Center
-                        ){
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceEvenly,
-                                modifier = Modifier
-                                    .fillMaxSize(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                IconButton(onClick = {  }) {
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_camera),
-                                        contentDescription = null,
-                                        tint = VideoEditorTheme.colors.whiteColor
-                                    )
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .size(60.dp)
-                                        .clip(CircleShape)
-                                        .background(VideoEditorTheme.colors.purpleColor),
-                                    contentAlignment = Alignment.Center
-                                ){
-                                    IconButton(onClick = {
-                                        isIconClicked = true
-                                        navController.navigate(Screen.ChooseMedia.route)
-                                    }) {
-                                        Icon(
-                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_add),
-                                            contentDescription = null,
-                                            tint = VideoEditorTheme.colors.whiteColor
-                                        )
-                                    }
-                                }
-                                IconButton(onClick = {  }) {
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_galery),
-                                        contentDescription = null,
-                                        tint = VideoEditorTheme.colors.whiteColor
-                                    )
-                                }
-                            }
-                        }
+                    }
+                    IconButton(onClick = { Unit }) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_settings),
+                            contentDescription = null,
+                            tint = VideoEditorTheme.colors.whiteColor
+                        )
+                    }
+                },
+            )
+        }, content = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = VideoEditorTheme.colors.background)
+                    .padding(top = it.calculateTopPadding())
+            ) {
+                LazyColumn(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(32.dp)
+                ) {
+                    items(5) {
+                        ItemPreview(
+                            item = mockProjects
+                        )
                     }
                 }
-        )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 48.dp)
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 42.dp)
+                        .height(87.dp)
+                        .clip(RoundedCornerShape(43.5.dp))
+                        .background(color = VideoEditorTheme.colors.blackTransparent30Color),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_camera),
+                                contentDescription = null,
+                                tint = VideoEditorTheme.colors.whiteColor,
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .clickable (
+                                    interactionSource = remember { MutableInteractionSource()},
+                                    indication = rememberRipple(
+                                        radius = 30.dp,
+                                        bounded = false
+                                    ),
+                                    onClick = {}
+                                )
+                                    .padding(15.dp)
+                            )
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_add),
+                            contentDescription = null,
+                            tint = VideoEditorTheme.colors.whiteColor,
+                            modifier = Modifier
+                                .size(60.dp)
+                                .clip(CircleShape)
+                                .background(VideoEditorTheme.colors.purpleColor)
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource()},
+                                    indication = rememberRipple(
+                                        radius = 50.dp
+                                    ),
+                                    onClick = {
+                                        isIconClicked = true
+                                        navController.navigate(Screen.ChooseMedia.route)
+                                    }
+                                )
+                                .padding(15.dp),
+                            )
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_galery),
+                                contentDescription = null,
+                                tint = VideoEditorTheme.colors.whiteColor,
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .clickable (
+                                    interactionSource = remember { MutableInteractionSource()},
+                                    indication = rememberRipple(
+                                        radius = 30.dp,
+                                        bounded = false
+                                    ),
+                                    onClick = {}
+                                    )
+                                    .padding(15.dp)
+                            )
+                    }
+                }
+            }
+        }
+    )
 
     if (isIconClicked) isIconClicked = false
 
@@ -203,8 +227,8 @@ fun ItemPreview(
                     Spacer(modifier = Modifier.weight(1f))
                     IconButton(
                         modifier = Modifier
-                            .pointerInput(true){
-                                detectTapGestures (
+                            .pointerInput(true) {
+                                detectTapGestures(
                                     onLongPress = {
                                         pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
                                     },
@@ -241,7 +265,7 @@ fun ItemPreview(
                     expanded = showDialog,
                     modifier = Modifier
                         .background(VideoEditorTheme.colors.whiteColor),
-                    onDismissRequest = { showDialog = false},
+                    onDismissRequest = { showDialog = false },
                     offset = pressOffset.copy(
                         y = pressOffset.y - itemHeight,
                         x = pressOffset.x + 254.dp

@@ -6,4 +6,6 @@ sealed class Screen(val route: String){
 
     object GetStoragePermission: Screen("get_storage_permission")
 
+    object Edit: Screen("edit")
+
 }
