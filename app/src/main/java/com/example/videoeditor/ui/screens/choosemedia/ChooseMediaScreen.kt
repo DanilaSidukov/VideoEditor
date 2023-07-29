@@ -1,7 +1,9 @@
 package com.example.videoeditor.ui.screens.choosemedia
 
 import android.annotation.SuppressLint
+import android.media.ImageReader
 import android.os.Build
+import android.widget.GridLayout
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -12,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.Top
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,6 +26,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.videoeditor.R
 import com.example.videoeditor.data.logic.convertFirstFrameToBitmap
 import com.example.videoeditor.data.logic.convertImageToBitmap
@@ -62,11 +67,12 @@ fun ChooseMediaScreen(
 
     var isDataLoaded by remember { mutableStateOf(false) }
 
-    val mediaList = remember { mutableListOf<MediaFiles>() }
+    val mediaList = remember { mutableStateListOf<MediaFiles>() }
 
     LaunchedEffect(true) {
         chooseMediaViewModel.mediaFlow.collect {
             mediaList.add(it)
+            println("itemMedia = ${it.mediaId}")
             isDataLoaded = true
         }
     }
@@ -174,21 +180,36 @@ fun MediaPreviewItem(
     ) {
         if (tabPosition == 0) {
             Box {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(7.dp),
-                    verticalArrangement = Arrangement.spacedBy(7.dp)
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(start = 16.dp, end = 16.dp, ),
                 ) {
-                    items(list.size) { index ->
-                        ItemMediaPreview(
-                            item = list[index],
-                            onItemClicked = {
-                            },
-                            chosenItemList
-                        )
+                    var startIndex = 0
+                    for (value in 0..list.size step 3) {
+                        println("start index = $startIndex")
+                        println("size = ${list.size}")
+                        if (startIndex < list.size - 2) {
+                            val finalIndex = startIndex + 2
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(vertical = 3.5.dp)
+                            ) {
+                                for (index in startIndex..finalIndex) {
+                                    ItemMediaPreview(
+                                        item = list[index],
+                                        onItemClicked = {
+                                        },
+                                        chosenItemList
+                                    )
+                                }
+                                startIndex += 3
+                            }
+                        }
                     }
+                    Spacer(Modifier.height(80.dp))
                 }
                 Button(
                     modifier = Modifier
@@ -197,7 +218,7 @@ fun MediaPreviewItem(
                         .clip(RoundedCornerShape(30.5.dp))
                         .padding(horizontal = 48.dp)
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = 42.dp),
+                        .padding(bottom = 22.dp, top = 12.dp),
                     onClick = {
                         isMediaChosen = if (chosenItemList.isNotEmpty()) {
                             navController.currentBackStackEntry?.savedStateHandle?.set(
@@ -247,17 +268,8 @@ fun ItemMediaPreview(
 
     println("drawing again")
 
-    val context = LocalContext.current
-
     var tempBool by remember { mutableStateOf(false) }
-    var imageBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
-
-    LaunchedEffect(item.mediaId) {
-        launch(Dispatchers.Default) {
-            imageBitmap = if (item.isVideo) convertFirstFrameToBitmap(context, item.mediaId)
-            else convertImageToBitmap(context, item.mediaPath!!)
-        }
-    }
+    val imageItem by remember { mutableStateOf(item.mediaPath) }
 
     Box(
         modifier = Modifier
@@ -268,14 +280,21 @@ fun ItemMediaPreview(
                 tempBool = !tempBool
             },
     ) {
-        imageBitmap?.let {
-            Image(
-                bitmap = it,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-            )
-        }
+        AsyncImage(
+            model = imageItem,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+        )
+//        imageBitmap?.let {
+//
+////            Image(
+////                bitmap = it,
+////                contentDescription = null,
+////                modifier = Modifier.fillMaxSize(),
+////                contentScale = ContentScale.Crop,
+////            )
+//        }
         if (tempBool) {
             Box(
                 modifier = Modifier

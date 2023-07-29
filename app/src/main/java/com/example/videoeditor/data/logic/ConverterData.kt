@@ -5,10 +5,12 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
+import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build
 import android.os.CancellationSignal
 import android.provider.MediaStore
+import android.provider.MediaStore.Video.Thumbnails.MINI_KIND
 import android.util.Size
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -18,24 +20,11 @@ import java.util.concurrent.TimeUnit
 
 fun convertImageToBitmap(context: Context, imageUri: String): ImageBitmap {
     val uri = Uri.fromFile(File(imageUri))
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri)).asImageBitmap()
-    } else {
-        MediaStore.Images.Media.getBitmap(context.contentResolver, uri).asImageBitmap()
-    }
+    return ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri)).asImageBitmap()
 }
 
 fun convertFirstFrameToBitmap(context: Context, path: String): ImageBitmap{
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        context.contentResolver.loadThumbnail(path.toUri(), Size(150, 150), CancellationSignal()).asImageBitmap()
-    } else {
-        MediaStore.Video.Thumbnails.getThumbnail(
-            context.contentResolver,
-            ContentUris.parseId(Uri.fromFile(File(path))),
-            MediaStore.Video.Thumbnails.MINI_KIND,
-            (BitmapFactory.Options()),
-        ).asImageBitmap()
-    }
+    return context.contentResolver.loadThumbnail(path.toUri(), Size(150, 150), CancellationSignal()).asImageBitmap()
 }
 
 fun convertIntToDuration(milliseconds: Int?): String?{

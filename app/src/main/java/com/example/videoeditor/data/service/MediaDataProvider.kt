@@ -27,11 +27,7 @@ class MediaDataProvider(private val context: Context) {
                 MediaStore.Video.VideoColumns.DURATION,
                 MediaStore.Video.VideoColumns.DATE_ADDED,
             )
-            collection =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.Video.Media.getContentUri(
-                    MediaStore.VOLUME_EXTERNAL
-                )
-                else MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+            collection = MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
 
             val cursorVideo = context.contentResolver.query(
                 collection,
@@ -51,7 +47,6 @@ class MediaDataProvider(private val context: Context) {
                                     cursorVideo.getString(2).toInt()
                                 ),
                                 mediaDateAdded = cursorVideo.getString(3).toInt(),
-                                isVideo = true
                             )
                         )
                         cursorVideo.moveToNext()
@@ -88,7 +83,6 @@ class MediaDataProvider(private val context: Context) {
                                 mediaName = cursorImage.getString(1),
                                 mediaDateAdded = cursorImage.getInt(2),
                                 mediaPath = cursorImage.getString(3),
-                                isVideo = false
                             )
                         )
                     } while (cursorImage.moveToNext())
@@ -109,6 +103,5 @@ data class MediaFiles(
     val mediaDuration: String? = null,
     val mediaDateAdded: Int? = null,
     val mediaBitmap: Bitmap? = null,
-    val isVideo: Boolean,
 )
 
